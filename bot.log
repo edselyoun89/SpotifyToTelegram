@@ -339,3 +339,79 @@
 2025-02-27 18:12:59,416 - INFO - Успешно отправлен: Last Christmas для 962283941
 2025-02-27 18:12:59,526 - INFO - Завершена обработка zxczxczx для 962283941
 2025-02-27 18:18:47,719 - ERROR - Ошибка запуска бота: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot7954171512:AAEvKXvSNR39MFZ_6xt4LsbJ_4VXfu6hGmA/getUpdates?offset=488892982&timeout=20 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x00000204A6670A90>: Failed to resolve 'api.telegram.org' ([Errno 11001] getaddrinfo failed)"))
+2025-02-27 18:45:33,674 - INFO - Пользователь 962283941 запустил бота
+2025-02-27 18:45:44,071 - INFO - Пользователь 962283941 выбрал качество 320 kbps через кнопку
+2025-02-27 18:45:52,321 - INFO - Пользователь 962283941 запросил авторизацию Spotify
+2025-02-27 18:46:15,564 - INFO - Пользователь 962283941 успешно авторизовался в Spotify
+2025-02-27 18:46:35,902 - INFO - Завершена обработка Going Under для 962283941
+2025-02-27 18:46:49,797 - ERROR - HTTP Error for GET to https://api.spotify.com/v1/tracks/79peV5xLwpUi7f5dXN7r5e with Params: {'market': None} returned 403 due to 
+<html><head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>403 Forbidden</title>
+</head>
+<body text=#000000 bgcolor=#ffffff>
+<h1>Error: Forbidden</h1>
+<h2>Your client does not have permission to get URL <code>/v1/tracks/79peV5xLwpUi7f5dXN7r5e</code> from this server.</h2>
+<h2></h2>
+</body></html>
+
+2025-02-27 18:46:49,801 - ERROR - Ошибка запуска бота: http status: 403, code:-1 - https://api.spotify.com/v1/tracks/79peV5xLwpUi7f5dXN7r5e:
+ 
+<html><head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>403 Forbidden</title>
+</head>
+<body text=#000000 bgcolor=#ffffff>
+<h1>Error: Forbidden</h1>
+<h2>Your client does not have permission to get URL <code>/v1/tracks/79peV5xLwpUi7f5dXN7r5e</code> from this server.</h2>
+<h2></h2>
+</body></html>
+, reason: None
+2025-02-27 18:46:58,938 - ERROR - HTTP Error for GET to https://api.spotify.com/v1/tracks/79peV5xLwpUi7f5dXN7r5e with Params: {'market': None} returned 403 due to 
+<html><head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>403 Forbidden</title>
+</head>
+<body text=#000000 bgcolor=#ffffff>
+<h1>Error: Forbidden</h1>
+<h2>Your client does not have permission to get URL <code>/v1/tracks/79peV5xLwpUi7f5dXN7r5e</code> from this server.</h2>
+<h2></h2>
+</body></html>
+
+2025-02-27 18:46:58,943 - ERROR - Ошибка запуска бота: http status: 403, code:-1 - https://api.spotify.com/v1/tracks/79peV5xLwpUi7f5dXN7r5e:
+ 
+<html><head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>403 Forbidden</title>
+</head>
+<body text=#000000 bgcolor=#ffffff>
+<h1>Error: Forbidden</h1>
+<h2>Your client does not have permission to get URL <code>/v1/tracks/79peV5xLwpUi7f5dXN7r5e</code> from this server.</h2>
+<h2></h2>
+</body></html>
+, reason: None
+2025-02-27 18:47:36,184 - INFO - Пользователь 962283941 запустил бота
+2025-02-27 18:47:54,496 - ERROR - HTTP Error for GET to https://api.spotify.com/v1/tracks/79peV5xLwpUi7f5dXN7r5e with Params: {'market': None} returned 403 due to 
+<html><head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>403 Forbidden</title>
+</head>
+<body text=#000000 bgcolor=#ffffff>
+<h1>Error: Forbidden</h1>
+<h2>Your client does not have permission to get URL <code>/v1/tracks/79peV5xLwpUi7f5dXN7r5e</code> from this server.</h2>
+<h2></h2>
+</body></html>
+
+2025-02-27 18:47:54,500 - ERROR - Ошибка запуска бота: http status: 403, code:-1 - https://api.spotify.com/v1/tracks/79peV5xLwpUi7f5dXN7r5e:
+ 
+<html><head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>403 Forbidden</title>
+</head>
+<body text=#000000 bgcolor=#ffffff>
+<h1>Error: Forbidden</h1>
+<h2>Your client does not have permission to get URL <code>/v1/tracks/79peV5xLwpUi7f5dXN7r5e</code> from this server.</h2>
+<h2></h2>
+</body></html>
+, reason: None
+2025-02-27 18:48:59,219 - ERROR - Ошибка запуска бота: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot7954171512:AAEvKXvSNR39MFZ_6xt4LsbJ_4VXfu6hGmA/getMe (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x000002A491B75910>: Failed to resolve 'api.telegram.org' ([Errno 11001] getaddrinfo failed)"))

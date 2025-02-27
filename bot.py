@@ -8,6 +8,7 @@ import time
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 import re
 from threading import Thread  # Добавляем для многопоточности
+from queue import Queue  # Для очереди загрузки
 
 # Логирование
 logging.basicConfig(filename='bot.log', level=logging.INFO,
@@ -16,6 +17,7 @@ logging.basicConfig(filename='bot.log', level=logging.INFO,
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 user_quality = {}  # Качество аудио для каждого пользователя
 user_auth_managers = {}  # Хранение auth_manager для авторизации
+user_queues = {}  # Очереди загрузки для каждого пользователя
 
 # Главная клавиатура
 def get_main_keyboard():
@@ -24,6 +26,8 @@ def get_main_keyboard():
     keyboard.add(KeyboardButton("/help"))
     keyboard.add(KeyboardButton("/auth"))
     keyboard.add(KeyboardButton("/quality"))
+    keyboard.add(KeyboardButton("/queue"))  # Добавляем кнопку для очереди
+    keyboard.add(KeyboardButton("/clear"))  # Добавляем кнопку для очистки очереди
     return keyboard
 
 @bot.message_handler(commands=['start'])
@@ -44,7 +48,9 @@ def send_help(message):
         "/help - Показать справку\n"
         "/auth - Подключить Spotify (вставь полный URL после авторизации)\n"
         "/quality [128/192/320] - Установить качество аудио (по умолчанию 192 kbps)\n"
-        "Отправь ссылку на плейлист Spotify для скачивания!"
+        "/queue - Показать очередь загрузки\n"
+        "/clear - Очистить очередь\n"
+        "Отправь ссылку на плейлист, альбом или трек Spotify для скачивания!"
     )
     bot.reply_to(message, help_text, reply_markup=get_main_keyboard())
 
@@ -114,12 +120,37 @@ def handle_quality_callback(call):
     bot.answer_callback_query(call.id)
     logging.info(f"Пользователь {user_id} выбрал качество {quality} kbps через кнопку")
 
+@bot.message_handler(commands=['queue'])
+def show_queue(message):
+    user_id = message.from_user.id
+    if user_id not in user_queues or not user_queues[user_id].queue:
+        bot.reply_to(message, "❌ Очередь пуста!", reply_markup=get_main_keyboard())
+        return
+    queue_list = list(user_queues[user_id].queue)
+    queue_text = "📋 **Очередь загрузки**:\n"
+    for i, url in enumerate(queue_list, 1):
+        queue_text += f"{i}. {url}\n"
+    bot.reply_to(message, queue_text, reply_markup=get_main_keyboard())
+    logging.info(f"Пользователь {user_id} запросил очередь")
+
+@bot.message_handler(commands=['clear'])
+def clear_queue(message):
+    user_id = message.from_user.id
+    if user_id in user_queues:
+        user_queues[user_id] = Queue()
+        bot.reply_to(message, "✅ Очередь очищена!", reply_markup=get_main_keyboard())
+        logging.info(f"Пользователь {user_id} очистил очередь")
+    else:
+        bot.reply_to(message, "❌ Очередь уже пуста!", reply_markup=get_main_keyboard())
+
 # Функция для скачивания и отправки трека в отдельном потоке
-def download_and_send_track(track, user_id, quality, chat_id, processed, track_count):
+def download_and_send_track(track, user_id, quality, chat_id, processed, track_count, total_size, start_time):
     progress = f"[{processed}/{track_count}] ({int(processed/track_count*100)}%)"
     bot.send_message(chat_id, f"⬇️ {progress} Скачиваю: {track['name']} - {track['artist']}")
     try:
         audio_file = download_audio(track['name'], track['artist'], quality)
+        file_size = os.path.getsize(audio_file) / (1024 * 1024)  # Размер в MB
+        total_size[0] += file_size
         with open(audio_file, 'rb') as audio:
             bot.send_audio(chat_id, audio, title=track['name'], performer=track['artist'])
         os.remove(audio_file)
@@ -128,44 +159,81 @@ def download_and_send_track(track, user_id, quality, chat_id, processed, track_c
         bot.send_message(chat_id, f"⚠️ Ошибка при скачивании {track['name']}: {str(e)}")
         logging.error(f"Ошибка скачивания {track['name']} для {user_id}: {str(e)}")
 
-@bot.message_handler(func=lambda message: "spotify.com/playlist" in message.text)
-def handle_playlist(message):
+# Обработка плейлистов, альбомов и треков
+def handle_playlist_processing(message, url):
     user_id = message.from_user.id
-    bot.reply_to(message, "🎧 Начинаю обработку плейлиста...", reply_markup=get_main_keyboard())
-    logging.info(f"Пользователь {user_id} отправил плейлист: {message.text}")
+    chat_id = message.chat.id
     
-    try:
-        tracks, playlist_name, track_count = get_spotify_playlist_tracks(message.text, user_id)
+    # Инициализация очереди, если её нет
+    if user_id not in user_queues:
+        user_queues[user_id] = Queue()
+    
+    # Добавляем URL в очередь
+    user_queues[user_id].put(url)
+    bot.send_message(chat_id, f"📥 Добавлено в очередь: {url}", reply_markup=get_main_keyboard())
+    
+    # Обрабатываем очередь
+    while not user_queues[user_id].empty():
+        current_url = user_queues[user_id].get()
+        bot.send_message(chat_id, f"🎧 Обрабатываю: {current_url}")
+        
+        # Определяем тип ссылки и получаем треки
+        tracks = []
+        playlist_name = "Unknown"
+        track_count = 0
+        total_size = [0]  # Для статистики (список для изменения в потоках)
+        start_time = time.time()
+        
+        if "spotify.com" in current_url:
+            if "playlist" in current_url:
+                tracks, playlist_name, track_count = get_spotify_playlist_tracks(current_url, user_id)
+            elif "album" in current_url:
+                sp, _ = get_spotify_client(user_id)
+                album_id = current_url.split("/")[-1].split("?")[0]
+                album = sp.album(album_id)
+                playlist_name = album['name']
+                tracks = [{'name': track['name'], 'artist': track['artists'][0]['name']} for track in album['tracks']['items']]
+                track_count = len(tracks)
+            elif "track" in current_url:
+                sp, _ = get_spotify_client(user_id)
+                track_id = current_url.split("/")[-1].split("?")[0]
+                track = sp.track(track_id)
+                playlist_name = track['name']
+                tracks = [{'name': track['name'], 'artist': track['artists'][0]['name']}]
+                track_count = 1
+        
         if not tracks:
-            bot.reply_to(message, "❌ Не удалось получить треки. Убедись, что ты авторизован (/auth) и плейлист доступен!")
-            return
+            bot.send_message(chat_id, "❌ Не удалось получить треки. Проверь ссылку или авторизацию (/auth)!")
+            continue
         
         quality = user_quality.get(user_id, "192")
-        bot.send_message(message.chat.id, f"📀 Плейлист: {playlist_name}\nТреков: {track_count}\nКачество: {quality} kbps")
+        bot.send_message(chat_id, f"📀 Источник: {playlist_name}\nТреков: {track_count}\nКачество: {quality} kbps")
         
         threads = []
         processed = 0
         for track in tracks:
             processed += 1
-            # Создаём поток для каждого трека
             thread = Thread(target=download_and_send_track, 
-                            args=(track, user_id, quality, message.chat.id, processed, track_count))
+                            args=(track, user_id, quality, chat_id, processed, track_count, total_size, start_time))
             threads.append(thread)
             thread.start()
         
-        # Ждём завершения всех потоков
         for thread in threads:
             thread.join()
         
-        bot.send_message(message.chat.id, f"✅ Готово! Все треки из {playlist_name} отправлены!")
+        elapsed_time = time.time() - start_time
+        stats = f"✅ Готово! Все треки из {playlist_name} отправлены!\n" \
+                f"Время: {elapsed_time:.2f} сек\nРазмер: {total_size[0]:.2f} MB"
+        bot.send_message(chat_id, stats, reply_markup=get_main_keyboard())
         logging.info(f"Завершена обработка {playlist_name} для {user_id}")
-    except Exception as e:
-        bot.reply_to(message, f"❌ Ошибка: {str(e)}")
-        logging.error(f"Ошибка обработки плейлиста для {user_id}: {str(e)}")
+
+@bot.message_handler(func=lambda message: any(x in message.text for x in ["spotify.com/playlist", "spotify.com/album", "spotify.com/track"]))
+def handle_playlist(message):
+    handle_playlist_processing(message, message.text)
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
-    bot.reply_to(message, "🤔 Отправь ссылку на плейлист Spotify или используй кнопки ниже!",
+    bot.reply_to(message, "🤔 Отправь ссылку на плейлист, альбом или трек Spotify или используй кнопки ниже!",
                  reply_markup=get_main_keyboard())
 
 try:
