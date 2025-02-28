@@ -2,3 +2,4 @@ telebot
 spotipy
 yt-dlp
 requests
+python-dotenv
