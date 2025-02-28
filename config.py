@@ -1,11 +1,10 @@
 import os
 
-TELEGRAM_TOKEN = "7954171512:AAEvKXvSNR39MFZ_6xt4LsbJ_4VXfu6hGmA"  # Вставь свой токен от BotFather
-SPOTIFY_CLIENT_ID = "905ff1dd336242ebb93b247739dfd08c"  # Из Spotify Developer Dashboard
-SPOTIFY_CLIENT_SECRET = "b46ffd1ee6b647ad9c5cba5b5d1749f8"  # Из Spotify Developer Dashboard
-SPOTIFY_REDIRECT_URI = "http://localhost:8888/callback"  # Для локальной машины
+TELEGRAM_TOKEN = "7954LsbJ_4VXfu6hGmA"  
+SPOTIFY_CLIENT_ID = "905f47739dfd08c"  
+SPOTIFY_CLIENT_SECRET = "b46ffd1cbb5d1749f8"  
+SPOTIFY_REDIRECT_URI = "http://localhost:8888/callback"  
 
-# Проверка на None
 if TELEGRAM_TOKEN is None:
     raise ValueError("TELEGRAM_TOKEN не задан в переменных окружения!")
 if SPOTIFY_CLIENT_ID is None:
