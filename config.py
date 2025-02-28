@@ -1,13 +1,13 @@
+from dotenv import load_dotenv
 import os
 
-from dotenv import dotenv_values
+load_dotenv()
 
-config = dotenv_values(".env")
-
-TELEGRAM_TOKEN = config.TELEGRAM_TOKEN # Вставь свой токен от BotFather
-SPOTIFY_CLIENT_ID = config.SPOTIFY_CLIENT_ID  # Из Spotify Developer Dashboard
-SPOTIFY_CLIENT_SECRET = config.SPOTIFY_CLIENT_SECRET # Из Spotify Developer Dashboard
-SPOTIFY_REDIRECT_URI = config.SPOTIFY_CLIENT_SECRET # Для локальной машины
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+SPOTIFY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
+FFMPEG_PATH = os.getenv("FFMPEG_PATH")
 
 # Проверка на None
 if TELEGRAM_TOKEN is None:

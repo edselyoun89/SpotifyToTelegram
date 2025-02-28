@@ -1,5 +1,6 @@
 import yt_dlp as youtube_dl
 import os
+from config import FFMPEG_PATH
 
 def download_audio(track_name, artist, quality="192", output_dir="downloads"):
     query = f"{track_name} {artist} audio"
@@ -11,7 +12,7 @@ def download_audio(track_name, artist, quality="192", output_dir="downloads"):
             'preferredcodec': 'mp3',
             'preferredquality': quality,
         }],
-        'ffmpeg_location': r'C:\Users\shtepcell\Downloads\ffmpeg-7.1-essentials_build\bin\ffmpeg.exe',
+        'ffmpeg_location': FFMPEG_PATH,
         'quiet': True,
     }
     
