@@ -1,0 +1,4 @@
+telebot
+spotipy
+yt-dlp
+requests
