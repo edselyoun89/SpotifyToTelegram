@@ -172,3 +172,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+.env
+*.pyc
+__pycache__/
+downloads/
+youtube.com_cookies.txt
+bot.log
